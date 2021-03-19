@@ -51,5 +51,9 @@ public:
 
 	static int obtenerUV(const char*,const char*);
 	static void actualizarPromedio(int);
+	static void actualizarAprobadas(int);
+
+	static void consultarPromedio(int);
+	static void consultarHistorial(int);
 };
 #endif // !1

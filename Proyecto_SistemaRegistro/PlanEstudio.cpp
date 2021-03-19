@@ -120,13 +120,16 @@ char* PlanEstudio::nombrePlanFile(const char* _codigoPlan) {
 
 	if (!PlanFile) {
 		cout << "Error al intentar abrir el archivo .dat\n\n";
-		return " ";
+		return nullptr;
 	}
 	else {
 		PlanArchivo actualPlan;
 		PlanFile.read(reinterpret_cast<char*>(&actualPlan), sizeof(PlanArchivo));
+		cout << "\nNOMBRE: " << actualPlan.nombrePlan;
 		return actualPlan.nombrePlan;
 	}
+
+	return nullptr;
 
 	PlanFile.close();
 }
@@ -595,8 +598,13 @@ int PlanEstudio::buscarMateriaArchivo(const char* _codigoPlan, const char* _codi
 			return posicionLectura;
 		}
 
-		PlanFile.read(reinterpret_cast<char*>(&actualMateria), sizeof(MateriaArchivo));
+		for (int i = 0; i < actualMateria->cantidadPadres; i++) {
+			HijoFile hijoFile;
+			PlanFile.read(reinterpret_cast<char*>(&hijoFile), sizeof(HijoFile));
+		}
+
 		posicionLectura = PlanFile.tellg();
+		PlanFile.read(reinterpret_cast<char*>(&actualMateria), sizeof(MateriaArchivo));
 	}
 
 	PlanFile.close();

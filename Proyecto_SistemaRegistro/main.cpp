@@ -2,6 +2,7 @@
 #include <conio.h>
 #include "PlanEstudio.h"
 #include "GestorMatricula.h"
+#include <fstream>
 
 int main() {
 	/*PlanEstudio plan("8I-1","SistemasCompu");
@@ -25,7 +26,7 @@ int main() {
 	while (opcionPrincipal != 4) {
 		cout << "\n\nM E N U  P R I N C I P A L\n" <<
 			"1. Opciones de Plan de Clases.\n2. Opciones de Matricula y Notas.\n3. Informacion Academica.\n4. Salir del Sistema.\n";
-		cout << "Seleccione una de las opciones anteriores: ";
+		cout << "\nSeleccione una de las opciones anteriores: ";
 		cin >> opcionPrincipal;
 
 		switch (opcionPrincipal)
@@ -37,7 +38,7 @@ int main() {
 			while (opcionesPlan != 7) {
 				cout << "\n\nM E N U  P L A N  D E  C L A S E S\n" <<
 					"1. Agregar Nuevo Plan.\n2. Cargar un Plan.\n3. Agregar Materias a un Plan.\n4. Eliminar Materias de un Plan.\n5. Editar Materia de un Plan.\n6. Ver Datos de un Plan y Materias.\n7. Regresar al menu principal.\n";
-				cout << "Seleccione una de las opciones anteriores: ";
+				cout << "\nSeleccione una de las opciones anteriores: ";
 				cin >> opcionesPlan;
 
 				PlanEstudio* PlanClases;
@@ -69,13 +70,13 @@ int main() {
 					cout << "Digite el CODGIO del Plan (maximo 6 caracteres): ";
 					cin >> codigo;
 
-					/*cout << "\nEscriba el NOMBRE del Plan (maximo 20 caracteres): ";
-					cin >> nombre;*/
-
 					PlanEstudio aux;
 					strcpy_s(nombre, strlen(aux.nombrePlanFile(codigo)), aux.nombrePlanFile(codigo));
 
-					PlanClases = new PlanEstudio(codigo, nombre);
+					if(nombre != nullptr)
+						PlanClases = new PlanEstudio(codigo, nombre);
+					else
+						cout << "\nNO EXISTE ESTE PLAN!!!";
 
 					break;
 				}
@@ -170,7 +171,7 @@ int main() {
 							while (opcionesCambio != 6) {
 								cout << "\n\nM E N U  M O D I F I C A R  C L A S E \n" <<
 									"1. Nuevo Codigo.\n2. Nuevo Nombre.\n3. Actualizar UV's.\n4. Actualizar Año.\n5. Actualizar Periodo.\n6. Volver al Menu de Plan de Clases.\n";
-								cout << "Seleccione una de las opciones anteriores: ";
+								cout << "\nSeleccione una de las opciones anteriores: ";
 								cin >> opcionesCambio;
 
 								switch (opcionesCambio)
@@ -291,8 +292,8 @@ int main() {
 			int opcionesMatricula = 0;
 			while (opcionesMatricula != 6) {
 				cout << "\n\nM E N U  M A T R I C U L A\n" <<
-					"1. Agregar Alumnos.\n2. Consultar Alumnos.\nMatricular Asignaturas.\n4. Actualizar Notas.\n5. Ver Notas.\n6. Regresar al menu principal.\n";
-				cout << "Seleccione una de las opciones anteriores: ";
+					"1. Agregar Alumnos.\n2. Consultar Alumnos.\n3. Matricular Asignaturas.\n4. Actualizar Notas.\n5. Ver Notas.\n6. Regresar al menu principal.\n";
+				cout << "\nSeleccione una de las opciones anteriores: ";
 				cin >> opcionesMatricula;
 
 				switch (opcionesMatricula)
@@ -373,8 +374,54 @@ int main() {
 		}
 
 		case 3: {
+			cout << "\n3. INFORMACION ACADEMICA.\n";
 
-			break;
+			int opcionesAcademica = 0;
+			while (opcionesAcademica != 3) {
+				cout << "\n\nM E N U  I N FO  A C A D E M I C A\n" <<
+					"1. Consultar el Promedio de un Alumno.\n2. Consultar el Historial academico de un Alumno.\n3. Regresar al menu principal.\n";
+				cout << "\nSeleccione una de las opciones anteriores: ";
+				cin >> opcionesAcademica;
+
+				switch (opcionesAcademica)
+				{
+				case 1: {
+					cout << "\n\n1. CONSULTAR EL PROMEDIO DE UN ALUMNO.\n";
+
+					cout << "\nIndique el Numero de Cuenta del Alumno:";
+					int ncuenta;
+					cin >> ncuenta;
+
+					EntidadEducativa::consultarPromedio(ncuenta);
+
+					break;
+				}
+
+				case 2: {
+					cout << "\n\n2. CONSULTAR EL HISTORIAL ACADEMICO DE UN ALUMNO.\n";
+
+					cout << "\nIndique el Numero de Cuenta del Alumno:";
+					int ncuenta;
+					cin >> ncuenta;
+
+					EntidadEducativa::consultarHistorial(ncuenta);
+
+					break;
+				}
+
+				case 3: {
+					cout << "\n\nS A L I E N D O ----> regresando a menu principal.\n";
+					break;
+				}
+
+				default: {
+					cout << "\n\nINTENTA DENUEVO, OPCION NO VALIDA.......\n";
+					break;
+				}
+				}
+
+				break;
+			}
 		}
 
 		case 4: {
