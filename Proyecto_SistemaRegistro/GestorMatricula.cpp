@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include "PlanEstudio.h"
+#include "Matricula.h"
 using namespace std;
 PlanEstudio* plan;
 
@@ -259,21 +260,19 @@ void EntidadEducativa::agregarNotas(int _cuentaAlu, const char* _codigoClas, flo
 			nuevaNota.periodoMatricula = _periodo;
 
 			notasFile.write(reinterpret_cast<const char*>(&nuevaNota), sizeof(nota));
+			notasFile.close();
 
+			actualizarAprobadas(_cuentaAlu);
+			actualizarPromedio(_cuentaAlu);
 		}
 		else {
 			cout << "\nERROR NO EXISTE ALUMNO!!!!\n";
 		}
-
-		actualizarAprobadas(_cuentaAlu);
-		actualizarPromedio(_cuentaAlu);
 		cout << "\nNOTA AGREGADA CON EXITO!!!!\n";
 	}
 	else {
 		cout << "\nERROR MATERIA NO EXISTE!!!!\n";
 	}
-
-	notasFile.close();
 }
 
 void EntidadEducativa::consultarNotas() {
@@ -454,118 +453,130 @@ void EntidadEducativa::actualizarPromedio(int _cuentaAlum) {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void EntidadEducativa::matricula() {
-	int _cuentaAlu = 0;
-	char _codigoPlan[4];
-	char _clase1[6] = " ";
-	char _clase2[6] = " ";
-	char _clase3[6] = " ";
+	cout << "\nIndique el Numero de Cuenta del Alumno:";
+	int ncuenta;
+	cin >> ncuenta;
 
-	int numclases = 0;
+	//BUSCAR EL CODIGO DE MATERIA EN EL ARCHIVO DE ALUMNOS
+	char* codigo = nullptr;
+	ifstream alumnosFile("alumnos.dat", ios::in | ios::binary);
 
-	cout << " ***** M A T R I C U L A ***** \n\n";
-	
-	while (numclases == 0 || numclases > 3) {
-		cout << "Cuantas clases desea matricular: ";
-		cin >> numclases;
-
-		if (numclases > 3)
-			cout << "\nEl maximo de clases para matricular es disponible es: " << 3;
-	}
-
-	alumno* estudiante = nullptr;
-	
-	while (_cuentaAlu == 0) {
-		cout << "\nIngrese su numero de cuenta: ";
-		cin >> _cuentaAlu;
-
-		if (existeAlumno(_cuentaAlu) == false)
-			_cuentaAlu = 0;
-		else
-			estudiante = buscarAlumno(_cuentaAlu);
-
-	}
-
-	char* codigoPlan{ estudiante->codigoPlan };
-	char* nombrePlan{ plan->nombrePlanFile(codigoPlan) };
-
-	PlanEstudio planClases(codigoPlan, nombrePlan);
-	int clasesListas = 0;
-	while (clasesListas > 0) {
-		if (estudiante != nullptr) {
-			if (numclases == 1) {
-				cout << "\nIngrese codigo de clase: ";
-				cin >> _clase1;
-
-				if (planClases.buscarMateria(_clase1) == nullptr) {
-					numclases--;
-
-					if (numclases == 2) {
-						cout << "\nIngrese codigo de clase: ";
-						cin >> _clase2;
-
-						if (planClases.buscarMateria(_clase2) == nullptr) {
-							numclases--;
-
-							if (numclases == 3) {
-								cout << "\nIngrese codigo de clase: ";
-								cin >> _clase3;
-
-								if (planClases.buscarMateria(_clase3) == nullptr)
-									numclases--;
-							}
-						}
-					}
-				}
-			}
-		}
-		else
-			break;
-	}
-
-	
-	
-	
-	ofstream matriculaFile("matricula.dat", ios::out | ios::app | ios::binary);
-
-	if (!matriculaFile) {
+	if (!alumnosFile) {
 		cout << "Error al intentar abrir el archivo .dat\n\n";
 		return;
 	}
 
-	matriculas nuevaMatricula;
-	
-	if (existeAlumno(_cuentaAlu) == true) {
-		strcpy_s(nuevaMatricula.codigoPlan, strlen(_codigoPlan) + 1, _codigoPlan);
-		nuevaMatricula.cuentaAlumno = _cuentaAlu;
-		strcpy_s(nuevaMatricula.codigoClase1, strlen(_clase1) + 1, _clase1);
-		strcpy_s(nuevaMatricula.codigoClase2, strlen(_clase2) + 1, _clase2);
-		strcpy_s(nuevaMatricula.codigoClase3, strlen(_clase3) + 1, _clase3);
+	alumnosFile.seekg(0, ios::beg);
 
+	alumno actualAlumno;
+	alumnosFile.read(reinterpret_cast<char*>(&actualAlumno), sizeof(alumno));
 
-		matriculaFile.write(reinterpret_cast<const char*>(&nuevaMatricula), sizeof(matriculas));
+	while (!alumnosFile.eof()) {
+		if (actualAlumno.cuenta == ncuenta) {
+			codigo = actualAlumno.codigoPlan;
+			alumnosFile.close();
+		}
+
+		alumnosFile.read(reinterpret_cast<char*>(&actualAlumno), sizeof(alumno));
 	}
 
-	matriculaFile.close();
+	alumnosFile.close();
+
+	if (codigo == nullptr) {
+		cout << "\nERROR MATERIA NO EXISTE!!!!\n";
+		return;
+	}
+
+	//VERIFICAR SI DICHO PLAN EXISTE
+	PlanEstudio aux;
+	char nombre[20];
+	string name = (string)codigo + "_plan.dat";
+
+	ifstream PlanFile(name, ios::in | ios::binary | ios::_Nocreate);
+
+	if (!PlanFile) {
+		cout << "\nERROR PLAN NO EXISTE!!!!\n";
+		return;
+	}
+	else {
+		PlanArchivo actualPlan;
+		PlanFile.read(reinterpret_cast<char*>(&actualPlan), sizeof(PlanArchivo));
+		strcpy_s(nombre, strlen(actualPlan.nombrePlan) + 1, actualPlan.nombrePlan);
+	}
+
+
+	PlanEstudio PlanClases(codigo, nombre);
+	Matricula Matricula(codigo);
+
+	Matricula.imprimirDisponibles();
+
+	int cantidadClases = -1;
+	while (cantidadClases > 3 || cantidadClases < 0) {
+		cout << "\nIndique la cantidad de clases a matricular Maximo 3: ";
+		cin >> cantidadClases;
+	}
+
+	if (cantidadClases == 0) {
+		cout << "\nSE CANCELO EL PROCESO DE MATRICULA!!!!\n";
+		return;
+	}
+
+	if (cantidadClases <= 3) {
+		for (int t = 0; t < cantidadClases; t++) {
+			cout << "Indique el Codigo de la Materia: ";
+			char codigoclass[8];
+			cin >> codigoclass;
+
+			//BUSCAR MATERIA EN EL ARCHIVO
+			bool Existeclase = false;
+			MateriaArchivo actualMateria;
+			PlanFile.seekg(0, ios::beg);
+			PlanFile.read(reinterpret_cast<char*>(&actualMateria), sizeof(MateriaArchivo));
+
+			materia** padres = nullptr;
+			materiaMatri** padresMatri = nullptr;
+
+			while (!PlanFile.eof()) {
+				padres = new materia * [actualMateria.cantidadPadres];
+				padresMatri = new materiaMatri * [actualMateria.cantidadPadres];
+
+				if (strcmp(actualMateria.codigo, codigoclass) == 0) {
+					Existeclase = true;
+				}
+
+				for (int i = 0; i < actualMateria.cantidadPadres; i++) {
+					HijoFile hijoFile;
+					PlanFile.read(reinterpret_cast<char*>(&hijoFile), sizeof(HijoFile));
+
+					materia* padre = PlanClases.buscarMateria(hijoFile.codigo);
+					materiaMatri* padreMatri = Matricula.buscarMateria(hijoFile.codigo);
+					padres[i] = padre;
+					padresMatri[i] = padreMatri;
+				}
+
+				PlanFile.read(reinterpret_cast<char*>(&actualMateria), sizeof(MateriaArchivo));
+			}
+
+			cout << "Indique la Nota Asignada:";
+			float nota;
+			cin >> nota;
+
+			cout << "Indique el Año:";
+			int anio;
+			cin >> anio;
+
+			cout << "Indique el periodo:";
+			int periodo;
+			cin >> periodo;
+
+			Matricula.agregarMateria(codigo, codigoclass, nota, anio, periodo, padresMatri, actualMateria.cantidadPadres);
+
+			EntidadEducativa::agregarNotas(ncuenta, codigoclass, nota, anio, periodo);
+		}
+	}
+	PlanFile.close();
 }
-
-
 
 
 bool EntidadEducativa::aprobada(int _cuentaAlumno,const char* _codigoMateria) {

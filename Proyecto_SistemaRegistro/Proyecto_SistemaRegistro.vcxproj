@@ -113,10 +113,12 @@
   <ItemGroup>
     <ClCompile Include="GestorMatricula.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Matricula.cpp" />
     <ClCompile Include="PlanEstudio.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GestorMatricula.h" />
+    <ClInclude Include="Matricula.h" />
     <ClInclude Include="PlanEstudio.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

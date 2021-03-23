@@ -6,7 +6,7 @@ using namespace std;
 
 vector<PlanEstudio*> Planes;
 
-PlanEstudio::PlanEstudio(const char* _codigo, const char* _nombre) :raices(nullptr) {
+PlanEstudio::PlanEstudio(const char* _codigo, const char* _nombre) : raices(nullptr) {
 	cantidadRaices = 0;
 
 	nombrePlan = new char[strlen(_nombre)];
@@ -125,7 +125,6 @@ char* PlanEstudio::nombrePlanFile(const char* _codigoPlan) {
 	else {
 		PlanArchivo actualPlan;
 		PlanFile.read(reinterpret_cast<char*>(&actualPlan), sizeof(PlanArchivo));
-		cout << "\nNOMBRE: " << actualPlan.nombrePlan;
 		return actualPlan.nombrePlan;
 	}
 
@@ -243,11 +242,10 @@ void PlanEstudio::agregarMateria(const char* _codigoPlan, const char* _nombrePla
 void PlanEstudio::agregarMateriaFromFile(const char* _codigoPlan, const char* _nombrePlan, const char* _codigoMateria, const char* _nombreMateria, int _uv, int _anio, int _periodo, materia** _padres, int _cantidadPadres) {
 	if (buscarMateria(_codigoMateria) == nullptr) {
 		materia* nueva = new materia(_codigoMateria, _nombreMateria, _uv, _anio, _periodo, _padres, _cantidadPadres);
-
 		if (estaVacio()) {
 			raices = new materia * [1];
 			raices[0] = nueva;
-			//cantidadRaices = cantidadRaices + 1;
+			cantidadRaices = cantidadRaices + 1;
 			cout << "\nCLASE AGREGADA EXITOSAMENTE!!!TO ROOTS\n";
 		}
 		else if (_padres == nullptr && !estaVacio()) {
@@ -263,9 +261,9 @@ void PlanEstudio::agregarMateriaFromFile(const char* _codigoPlan, const char* _n
 				delete raices;
 			}
 
-			//raices = new materia * [cantidadRaices + 1];
+			raices = new materia * [cantidadRaices + 1];
 			raices = tmp;
-			//cantidadRaices = cantidadRaices + 1;
+			cantidadRaices = cantidadRaices + 1;
 
 			cout << "\nCLASE AGREGADA EXITOSAMENTE!!!TO ROOTS\n";
 		}
@@ -354,6 +352,16 @@ void PlanEstudio::imprimirRec(materia** _raices, materia* _raiz) {
 		for (int i = 0; i < _raices[j]->cantidadHijos; i++) {
 			imprimirRec(_raices[j]->hijos,_raices[j]->hijos[i]);
 		}
+	}
+}
+
+void PlanEstudio::imprimirRaices() {
+	if (raices == nullptr)
+		return;
+
+	cout << "\n* * *  C L A S E S  D I S P O N I B L E S  * * *\n";
+	for (int j = 0; j < cantidadRaices; j++) {
+		raices[j]->getDatos();
 	}
 }
 

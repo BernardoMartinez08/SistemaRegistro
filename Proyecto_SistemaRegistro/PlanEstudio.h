@@ -122,6 +122,7 @@ public:
 	void actualizarTotalBloques();
 
 	void imprimir();
+	void imprimirRaices();
 
 	char* getCodigo();
 	char* getNombre();

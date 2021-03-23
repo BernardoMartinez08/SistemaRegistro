@@ -65,13 +65,27 @@ int main() {
 					cout << "\n\n2. CARGAR UN PLAN.\n";
 
 					char codigo[6];
-					char nombre[20];
+					char* nombre;
 
-					cout << "Digite el CODGIO del Plan (maximo 6 caracteres): ";
+					cout << "Digite el CODIGO del Plan (maximo 6 caracteres): ";
 					cin >> codigo;
 
-					PlanEstudio aux;
-					strcpy_s(nombre, strlen(aux.nombrePlanFile(codigo)), aux.nombrePlanFile(codigo));
+					string name = (string)codigo + "_plan.dat";
+
+					ifstream PlanFile(name, ios::in | ios::binary | ios::_Nocreate);
+
+					if (!PlanFile) {
+						cout << "Error al intentar abrir el archivo .dat\n\n";
+						nombre = nullptr;
+					}
+					else {
+						PlanArchivo actualPlan;
+						PlanFile.read(reinterpret_cast<char*>(&actualPlan), sizeof(PlanArchivo));
+						nombre = actualPlan.nombrePlan;
+					}
+
+
+					PlanFile.close();
 
 					if(nombre != nullptr)
 						PlanClases = new PlanEstudio(codigo, nombre);
@@ -121,7 +135,7 @@ int main() {
 								materia* padre = nullptr;
 
 								while (padre == nullptr) {
-									cout << "Digite el CODGIO de la Clase Pladre (maximo 8 caracteres): ";
+									cout << "Digite el CODGIO de la Clase Padre (maximo 8 caracteres): ";
 									cin >> codigoPadre;
 
 									padre = PlanClases->buscarMateria(codigoPadre);
@@ -133,11 +147,6 @@ int main() {
 							padres = nullptr;
 						}
 
-						if (padres == nullptr)
-							cout << "\n\nPAPA NULO VOS\n";
-						else
-							cout << "\n\nSI TIENE PAPAS\n\n";
-
 						PlanClases->agregarMateria(PlanClases->getCodigo(), PlanClases->getNombre(), codigo, nombre, uv, anio, periodo, padres, cantidadPadres);
 					}
 					else {
@@ -148,7 +157,20 @@ int main() {
 				}
 
 				case 4: {
-					cout << "\n\n5. Editar Materia de un Plan.\n";
+					cout << "\n\n4. Eliminar Materia de un Plan.\n";
+
+					PlanEstudio aux;
+					if (PlanClases != nullptr) {
+						char codigo[8];
+
+						cout << "Digite el CODGIO de la Clase (maximo 8 caracteres): ";
+						cin >> codigo;
+
+						PlanClases->eliminarMateria(codigo);
+					}
+					else {
+						cout << "\n\nAGREGUE UN NUEVO PLAN DE CLASES O ABRA UNO EXISTENTE ANTES DE USAR ESTA FUNCION!!!!!!\n\n";
+					}
 
 					break;
 				}
@@ -266,7 +288,6 @@ int main() {
 				case 6: {
 					cout << "\n\n6. VER DATOS DEL PLAN Y MATERIAS.\n";
 
-					cout << PlanClases->getCodigo();
 					PlanClases->imprimir();
 					break;
 				}
@@ -315,7 +336,7 @@ int main() {
 
 				case 3: {
 					cout << "\n\n3. MATRICULAR ASIGNATURA.\n";
-
+	
 					EntidadEducativa::matricula();
 
 					break;
