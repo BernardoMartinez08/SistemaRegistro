@@ -149,6 +149,6 @@ private:
 	materia* buscarMateriaRec(materia**, int, const char*);
 	void imprimirRec(materia**, materia*);
 
-	void reescribirMateriasRec(materia**, materia*, int);
+	void reescribirMateriasRec(materia**, int, int);
 };
 #endif // !PLAN_ESTUDIO_H

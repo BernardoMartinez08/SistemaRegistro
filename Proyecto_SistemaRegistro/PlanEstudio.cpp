@@ -53,7 +53,7 @@ PlanEstudio::PlanEstudio(const char* _codigo, const char* _nombre) : raices(null
 		codigoPlan = new char[strlen(_codigo)];
 		strcpy_s(codigoPlan, strlen(_codigo) + 1, _codigo);
 
-		codigoPlan = new char[strlen(_nombre)];
+		nombrePlan = new char[strlen(_nombre)];
 		strcpy_s(nombrePlan, strlen(_nombre) + 1, _nombre);
 		
 		totalClases = actualPlan.totalClases;
@@ -166,7 +166,7 @@ void PlanEstudio::agregarMateria(const char* _codigoPlan, const char* _nombrePla
 				delete raices;
 			}
 
-			//raices = new materia * [cantidadRaices + 1];
+			raices = new materia * [cantidadRaices + 1];
 			raices = tmp;
 			cantidadRaices = cantidadRaices + 1;
 
@@ -245,7 +245,7 @@ void PlanEstudio::agregarMateriaFromFile(const char* _codigoPlan, const char* _n
 		if (estaVacio()) {
 			raices = new materia * [1];
 			raices[0] = nueva;
-			cantidadRaices = cantidadRaices + 1;
+			//cantidadRaices = cantidadRaices + 1;
 			cout << "\nCLASE AGREGADA EXITOSAMENTE!!!TO ROOTS\n";
 		}
 		else if (_padres == nullptr && !estaVacio()) {
@@ -261,9 +261,9 @@ void PlanEstudio::agregarMateriaFromFile(const char* _codigoPlan, const char* _n
 				delete raices;
 			}
 
-			raices = new materia * [cantidadRaices + 1];
+			raices = new materia * [cantidadRaices];
 			raices = tmp;
-			cantidadRaices = cantidadRaices + 1;
+			//cantidadRaices = cantidadRaices + 1;
 
 			cout << "\nCLASE AGREGADA EXITOSAMENTE!!!TO ROOTS\n";
 		}
@@ -277,7 +277,7 @@ void PlanEstudio::agregarMateriaFromFile(const char* _codigoPlan, const char* _n
 					return;
 				}
 				else {
-					materia** tmp = new materia * [padre->cantidadHijos + 1];
+					materia** tmp = new materia * [padre->cantidadHijos];
 
 					for (int i = 0; i < padre->cantidadHijos; i++) {
 						tmp[i] = padre->hijos[i];
@@ -631,7 +631,6 @@ void PlanEstudio::reescribirArchivoPlan() {
 	//actualizarTotalClases(raices, nullptr);
 	//actualizarTotalUV(raices, nullptr);
 	//actualizarTotalBloques();
-
 	string name = (string)codigoPlan + "_plan.dat";
 
 	ofstream PlanFile(name, ios::out | ios::binary);
@@ -644,7 +643,6 @@ void PlanEstudio::reescribirArchivoPlan() {
 	PlanArchivo nuevoArchivo;
 	
 	strcpy_s(nuevoArchivo.codigoPlan, strlen(codigoPlan) + 1, codigoPlan);
-	cout << "\nNOMBRE REESCRITO: " << nombrePlan;
 	strcpy_s(nuevoArchivo.nombrePlan, strlen(nombrePlan) + 1, nombrePlan);
 
 	nuevoArchivo.totalUnidades = totalUnidades;
@@ -661,14 +659,14 @@ void PlanEstudio::reescribirArchivoPlan() {
 }
 
 void PlanEstudio::reescribirMaterias(int pocision) {
-	reescribirMateriasRec(raices, nullptr, pocision);
+	reescribirMateriasRec(raices, cantidadRaices, pocision);
 }
 
-void PlanEstudio::reescribirMateriasRec(materia** _raices, materia* _raiz, int posicion) {
+void PlanEstudio::reescribirMateriasRec(materia** _raices, int tamano, int posicion) {
 	if (_raices == nullptr)
 		return;
 
-	for (int j = 0; j < cantidadRaices; j++) {
+	for (int j = 0; j < tamano; j++) {
 		//GUARDAR EN ARCHIVO LA NUEVA MATERIA
 		string name = (string)codigoPlan + "_plan.dat";
 
@@ -694,7 +692,6 @@ void PlanEstudio::reescribirMateriasRec(materia** _raices, materia* _raiz, int p
 
 		HijoFile hijoFile;
 		for (int i = 0; i < _raices[j]->cantidadPadres; i++) {
-			cout << _raices[j]->padres[i]->codigo << "\n";
 			strcpy_s(hijoFile.codigo, strlen(_raices[j]->padres[i]->codigo) + 1, _raices[j]->padres[i]->codigo);
 			materiaFile.write(reinterpret_cast<const char*>(&hijoFile), sizeof(HijoFile));
 			posicionEscritura = materiaFile.tellp();
@@ -702,13 +699,13 @@ void PlanEstudio::reescribirMateriasRec(materia** _raices, materia* _raiz, int p
 
 		materiaFile.close();
 	
-		for (int i = 0; i < _raices[j]->cantidadHijos; i++) {
-			reescribirMateriasRec(_raices[j]->hijos, _raices[j]->hijos[i],posicionEscritura);
-		}
+		//for (int i = 0; i < _raices[j]->cantidadHijos; i++) {
+			reescribirMateriasRec(_raices[j]->hijos, _raices[j]->cantidadHijos,posicionEscritura);
+		//}
 
-		/*for (int j = 0; j < cantidadRaices; j++) {
-			for (int i = 0; i < _raices[j]->cantidadHijos; i++) {
-				reescribirMateriasRec(_raices[j]->hijos, _raices[j]->hijos[i], posicionEscritura);
+		/*for (int k = 0; k < cantidadRaices; k++) {
+			for (int i = 0; i < _raices[k]->cantidadHijos; i++) {
+				reescribirMateriasRec(_raices[k]->hijos, _raices[k]->hijos[i], posicionEscritura);
 			}
 		}*/
 	}
